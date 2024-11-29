@@ -1,0 +1,12 @@
+If:
+  PathMatch: .*\.c
+CompileFlags:
+  Add: [-include=./src/inc.h]
+---
+Diagnostics:
+  UnusedIncludes: None
+  
+# If:
+#   PathMatch: ^src.*\.h
+# CompileFlags:
+#   Add: [-include=./src/inc.h]
