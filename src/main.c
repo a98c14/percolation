@@ -1,23 +1,5 @@
-#include "opus/base/base_inc.h"
-#include "opus/base/base_inc.c"
-
-#include "opus/gfx/gfx_inc.h"
-#include "opus/gfx/gfx_inc.c"
-
-#include "opus/os/os_inc.h"
-#include "opus/os/os_inc.c"
-
-#include "opus/text/text_inc.h"
-#include "opus/text/text_inc.c"
-
-#include "opus/draw/draw_inc.h"
-#include "opus/draw/draw_inc.c"
-
-#include "opus/ui/ui_inc.h"
-#include "opus/ui/ui_inc.c"
-
-#include "opus/input/input_inc.h"
-#include "opus/input/input_inc.c"
+#include "percolation.h"
+#include "percolation.c"
 
 int32
 main(void)
@@ -44,33 +26,88 @@ main(void)
     String action_quit = string("quit");
     input_register_key(ui_input_select, OS_KeyCode_MouseLeft);
     input_register_key(action_quit, OS_KeyCode_BracketRight);
+    random_init(123818);
 
     /** ui state */
     float32 slider_value = 0;
     bool32  should_quit  = false;
 
+    const float32 circle_radius = 12;
+    const float32 padding       = 12;
+    const float32 circle_size   = circle_radius + padding;
+
+    const int32 row_count    = 40;
+    const int32 column_count = 40;
+    const int32 cell_count   = row_count * column_count;
+    const Vec2  cell_offset  = vec2(-circle_size * ((float32)row_count / 2), -circle_size * ((float32)column_count / 2));
+
+    Cell* cells = arena_push_array_zero(persistent_arena, Cell, cell_count);
+
+    for (int32 y = 0; y < row_count; y++)
+    {
+        for (int32 x = 0; x < column_count; x++)
+        {
+            int32 cell_index        = (y * row_count) + x;
+            cells[cell_index].color = color_from_vec4(vec4((float32)x / column_count, (float32)y / row_count, 1, 1));
+            for (int32 i = 0; i < EdgeDirection_COUNT; i++)
+            {
+                if (random_f32(1) > 0.5f)
+                {
+                    cells[cell_index].edges[i] = 1;
+                }
+            }
+            // d_arrow(vec2(x * circle_size, y * circle_size), vec2(x * circle_size, y * circle_size + 10), 1, ColorRed50);
+        }
+    }
+
     float32 dt = 0.05f; // TODO(selim): calculate this
     for (;;)
     {
         input_update(dt);
+        arena_reset(frame_arena);
 
-        Input_MouseInfo mouse = input_mouse_info();
         if (input_is_pressed(action_quit))
         {
             should_quit = true;
         }
 
-        d_string_at(vec2(-100, -100), string_pushf(frame_arena, "Cursor: %f, %f", mouse.screen.x, mouse.screen.y), 32, ColorBlack, AlignmentLeft);
-
-        Input_Key key = _input_context->keys[OS_KeyCode_MouseLeft];
-        d_string_at(vec2(-100, -130), string_pushf(frame_arena, "Key State: %d, Event Start: %llu, Event End: %llu", key.state, _input_context->input_event_buffer_start, _input_context->input_event_buffer_end), 32, ColorWhite100, AlignmentLeft);
-        d_circle(mouse.screen, 24, 1, ColorBlack);
-        arena_reset(frame_arena);
+        // Input_MouseInfo mouse = input_mouse_info();
+        // Input_Key key = _input_context->keys[OS_KeyCode_MouseLeft];
 
         if (should_quit || os_window_should_close(window))
         {
             log_info("Exiting...");
             break;
+        }
+
+        // draw edges
+        for (int32 y = 0; y < row_count; y++)
+        {
+            for (int32 x = 0; x < column_count; x++)
+            {
+                Cell c = cells[(y * row_count) + x];
+                Vec2 p = add_vec2(vec2(x * circle_size, y * circle_size), cell_offset);
+                for (int32 i = 0; i < EdgeDirection_COUNT; i++)
+                {
+                    if (c.edges[i])
+                    {
+                        Vec2 offset = mul_vec2_f32(edge_offsets[i], circle_size);
+                        d_line(p, add_vec2(p, offset), 2, ColorWhite100);
+                    }
+                }
+                // d_arrow(vec2(x * circle_size, y * circle_size), vec2(x * circle_size, y * circle_size + 10), 1, ColorRed50);
+            }
+        }
+
+        // draw circles
+        for (int32 y = 0; y < row_count; y++)
+        {
+            for (int32 x = 0; x < column_count; x++)
+            {
+                Cell c = cells[(y * row_count) + x];
+                Vec2 p = add_vec2(vec2(x * circle_size, y * circle_size), cell_offset);
+                d_circle(p, circle_radius, 1, c.color);
+            }
         }
 
         ui_create_fixed(screen_rect())
