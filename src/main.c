@@ -29,8 +29,9 @@ main(void)
     random_init(123818);
 
     /** ui state */
-    float32 slider_value = 0;
-    bool32  should_quit  = false;
+    float32 prev_slider_value = 0;
+    float32 slider_value      = 0;
+    bool32  should_quit       = false;
 
     const float32 circle_radius = 12;
     const float32 padding       = 12;
@@ -40,29 +41,12 @@ main(void)
     const int32 column_count = 40;
     const int32 cell_count   = row_count * column_count;
     const Vec2  cell_offset  = vec2(-circle_size * ((float32)row_count / 2), -circle_size * ((float32)column_count / 2));
-
-    Cell* cells = arena_push_array_zero(persistent_arena, Cell, cell_count);
-
-    for (int32 y = 0; y < row_count; y++)
-    {
-        for (int32 x = 0; x < column_count; x++)
-        {
-            int32 cell_index        = (y * row_count) + x;
-            cells[cell_index].color = color_from_vec4(vec4((float32)x / column_count, (float32)y / row_count, 1, 1));
-            for (int32 i = 0; i < EdgeDirection_COUNT; i++)
-            {
-                if (random_f32(1) > 0.5f)
-                {
-                    cells[cell_index].edges[i] = 1;
-                }
-            }
-            // d_arrow(vec2(x * circle_size, y * circle_size), vec2(x * circle_size, y * circle_size + 10), 1, ColorRed50);
-        }
-    }
+    Cell*       cells        = arena_push_array_zero(persistent_arena, Cell, cell_count);
 
     float32 dt = 0.05f; // TODO(selim): calculate this
     for (;;)
     {
+        prev_slider_value = slider_value;
         input_update(dt);
         arena_reset(frame_arena);
 
@@ -78,6 +62,43 @@ main(void)
         {
             log_info("Exiting...");
             break;
+        }
+
+        ui_create_fixed(screen_rect())
+        {
+            ui_create(CutSideTop, 64)
+            {
+                ui_create(CutSideLeft, 512)
+                {
+                    ui_fill(ColorSlate900);
+                    ui_pad(8);
+                    ui_slider(string("Cut Off:"), 0, 1.0, &slider_value);
+                }
+            }
+        }
+
+        if (prev_slider_value != slider_value)
+        {
+            for (int32 y = 0; y < row_count; y++)
+            {
+                for (int32 x = 0; x < column_count; x++)
+                {
+                    int32 cell_index        = (y * row_count) + x;
+                    cells[cell_index].color = color_from_vec4(vec4((float32)x / column_count, (float32)y / row_count, 1, 1));
+                    for (int32 i = 0; i < EdgeDirection_COUNT; i++)
+                    {
+                        if (random_f32(1) > slider_value)
+                        {
+                            cells[cell_index].edges[i] = 1;
+                        }
+                        else
+                        {
+                            cells[cell_index].edges[i] = 0;
+                        }
+                    }
+                    // d_arrow(vec2(x * circle_size, y * circle_size), vec2(x * circle_size, y * circle_size + 10), 1, ColorRed50);
+                }
+            }
         }
 
         // draw edges
@@ -107,19 +128,6 @@ main(void)
                 Cell c = cells[(y * row_count) + x];
                 Vec2 p = add_vec2(vec2(x * circle_size, y * circle_size), cell_offset);
                 d_circle(p, circle_radius, 1, c.color);
-            }
-        }
-
-        ui_create_fixed(screen_rect())
-        {
-            ui_create(CutSideTop, 64)
-            {
-                ui_create(CutSideLeft, 512)
-                {
-                    ui_fill(ColorSlate900);
-                    ui_pad(8);
-                    ui_slider(string("Text Size:"), 6, 64, &slider_value);
-                }
             }
         }
 
