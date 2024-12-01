@@ -18,9 +18,36 @@ typedef enum
 
 typedef struct
 {
-    Color color;
-    int32 edges[4];
+    int32  from_x;
+    int32  from_y;
+    int32  from;
+    int32  to_x;
+    int32  to_y;
+    int32  to;
+    bool32 is_active;
+    Color  color;
+} Edge;
+
+typedef struct
+{
+    Color  color;
+    bool32 will_be_processed;
+    bool32 is_processed;
 } Cell;
+
+typedef struct
+{
+    int32 edge_count;
+    int32 edges[4];
+} CellEdgeMap;
+
+typedef struct CellNode CellNode;
+struct CellNode
+{
+    Cell*     v;
+    int32     cell_index;
+    CellNode* next;
+};
 
 Vec2 edge_offsets[4] = {
     {.x = 1,  .y = 0 },
@@ -28,3 +55,13 @@ Vec2 edge_offsets[4] = {
     {.x = 0,  .y = 1 },
     {.x = 0,  .y = -1},
 };
+
+typedef struct
+{
+    int32 x;
+    int32 y;
+} CellCoords;
+
+internal int32 get_cell_index(int32 x, int32 y, int32 col_count);
+internal int32 get_neighbour_index(int32 x, int32 y, EdgeDirection direction, int32 row_count, int32 col_count);
+internal void  set_edge_index(Edge* edges, CellEdgeMap* cell_edge_map, int32 edge_index, int32 from_x, int32 from_y, int32 to_x, int32 to_y, int32 column_count);
