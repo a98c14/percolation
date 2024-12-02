@@ -29,8 +29,8 @@ main(void)
     random_init(123818);
 
     /** ui state */
-    float32 prev_slider_value = 0;
-    float32 slider_value      = 0;
+    float32 prev_slider_value = 0.5;
+    float32 slider_value      = 0.5f;
     bool32  should_quit       = false;
 
     const float32 circle_radius = 12;
@@ -45,6 +45,7 @@ main(void)
     Cell*        cells         = arena_push_array_zero(persistent_arena, Cell, cell_count);
     Edge*        edges         = arena_push_array_zero(persistent_arena, Edge, edge_count);
     CellEdgeMap* cell_edge_map = arena_push_array_zero(persistent_arena, CellEdgeMap, cell_count);
+    bool32       should_update = true;
 
     // setup edges
     {
@@ -101,10 +102,13 @@ main(void)
                 }
             }
         }
+        should_update = should_update || (prev_slider_value != slider_value);
 
-        if (prev_slider_value != slider_value)
+        if (should_update)
         {
+            should_update = false;
             memory_zero_typed(cells, cell_count);
+
             // set edges
             for (int32 i = 0; i < edge_count; i++)
             {

@@ -21,8 +21,8 @@ if "%asan%"=="1" set compile_flags=%compile_flags% -fsanitize=address && echo [a
 
 :: --- Compile Arguments ------------------------------------------------------
 set cl_warnings= /W4 /WX /wd4201 /wd4456
-set cl_common=   /I..\src\ /I..\src\opus\third_party\ /nologo /FC /Z7 %deps%
-set cl_debug=    call cl /Od /Ob1 /DBUILD_DEBUG=1 %cl_warnings% %cl_common% %compile_flags%
+set cl_common=   /I..\src\ /I..\src\opus\third_party\ /nologo /FC %deps%
+set cl_debug=    call cl /Od /Ob1 /DBUILD_DEBUG=1 /Z7 %cl_warnings% %cl_common% %compile_flags%
 set cl_release=  call cl /O2 /DBUILD_DEBUG=0 %cl_common% %compile_flags%
 set cl_link=     /link /MANIFEST:EMBED /INCREMENTAL:NO /pdbaltpath:%%%%_PDB%%%%
 set cl_out=      /out:
