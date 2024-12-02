@@ -85,7 +85,7 @@ jobs:
       run: |
         New-Item -itemType Directory -Force -Path ${{ env.output_bin_path }}
         New-Item -itemType Directory -Force -Path ${{ env.output_asset_path }}
-        Move-Item .\dist\  ${{ env.output_bin_path }}
+        Move-Item .\dist\*  ${{ env.output_bin_path }}
         Copy-Item -Path "${{ env.dependency_dir }}/*" -Destination ${{ env.output_bin_path }} -Recurse
         Copy-Item -Path "${{ env.asset_path }}/*" -Destination ${{ env.output_asset_path }} -Recurse
         Write-Host "Dependencies copied successfully!"
@@ -113,7 +113,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: v${{ env.version }}
-        name: space_fighter_${{ env.version }}
+        name: percolation_${{ env.version }}
         draft: false
         prerelease: false
         files: |
