@@ -80,7 +80,7 @@ jobs:
     - name: Build
       shell: powershell
       run: |
-        .\tools\build_win.ps1 output=percolation\bin\percolation.exe version="v${{ env.version }}.$(git describe --always --dirty)" game release
+        .\scripts\build.bat main release
         
     - name: Copy dependencies
       shell: pwsh
