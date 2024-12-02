@@ -10,11 +10,9 @@ on:
 env:
   version: '0.0'
   asset_path: './assets'
-  shader_path: './shaders'
   output_path: './percolation'
   output_bin_path: './percolation/bin/'
   output_asset_path: './percolation/assets/'
-  output_shader_path: './percolation/shaders/'
   exe_path: './percolation/percolation.exe'
   dependency_dir: './dependencies'
   zip_file_name: 'percolation'
@@ -87,11 +85,9 @@ jobs:
       run: |
         New-Item -itemType Directory -Force -Path ${{ env.output_bin_path }}
         New-Item -itemType Directory -Force -Path ${{ env.output_asset_path }}
-        New-Item -itemType Directory -Force -Path ${{ env.output_shader_path }}
         Move-Item .\dist\  ${{ env.output_bin_path }}
         Copy-Item -Path "${{ env.dependency_dir }}/*" -Destination ${{ env.output_bin_path }} -Recurse
         Copy-Item -Path "${{ env.asset_path }}/*" -Destination ${{ env.output_asset_path }} -Recurse
-        Copy-Item -Path "${{ env.shader_path }}/*" -Destination ${{ env.output_shader_path }} -Recurse
         Write-Host "Dependencies copied successfully!"
 
     - name: Zip output folder
