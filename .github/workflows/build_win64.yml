@@ -81,6 +81,7 @@ jobs:
       shell: powershell
       run: |
         .\scripts\build.bat main release
+        move .\dist\  ${{ env.output_bin_path }}
         
     - name: Copy dependencies
       shell: pwsh
