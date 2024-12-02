@@ -189,11 +189,6 @@ main(void)
                         Vec2 p_to   = add_vec2(vec2(e.to_x * circle_size, e.to_y * circle_size), cell_offset);
                         d_line(p_from, p_to, 2, ColorWhite100);
                     }
-                    // if (c.edges[i])
-                    // {
-                    //     Vec2 offset = mul_vec2_f32(edge_offsets[i], circle_size);
-                    //     d_line(p, add_vec2(p, offset), 2, ColorWhite100);
-                    // }
                 }
             }
         }
